@@ -1,0 +1,107 @@
+#! /bin/sh -
+if [ $# -lt 2 ];then
+    echo "error" && exit 1
+fi
+
+while [ $# -gt 0 ]; do
+    if echo $1 | grep "http://" &> /dev/null ;then
+        http_path=$1
+    elif echo $1 | grep "/dev/" &> /dev/null ;then
+        dev=$1
+    elif echo $1 | grep "dddd" &> /dev/null ; then
+        dddd=$1
+    fi
+    shift
+done
+
+if [ -z "$http_path" -o -z "$dev" ];then
+    echo '$http_path and $dev should with right values!!!'
+    exit 1
+fi
+
+echo http_path: $http_path
+echo dev: $dev
+echo dddd: $dddd
+
+file_name=`basename $http_path`
+dd_name=${file_name%.*}
+dir_name=${file_name%%.*}
+
+
+is_empty_dir()
+{
+    return `ls -A $1|wc -w`
+}
+
+
+create_dir()
+{
+    if [ X"$dddd" == X"dddd" ];then
+        if [  -d $dir_name -a  -f ${dir_name}/${file_name} ];then
+            echo "Will check zip file under $dir_name"
+        else
+            echo "No $dir_name or $file_name ???" && exit 1
+        fi
+    else
+        if [ ! -d $dir_name ];then
+            echo "Create $dir_name..."
+            mkdir $dir_name
+        elif is_empty_dir $dir_name ;then
+            echo "Will download zip file into the existence empty $dir_name ..."
+        else
+            echo "Will remove all files under $dir_name"
+            echo "Do nothing..."
+            exit 1
+        fi
+    fi
+    
+    cd $dir_name || exit 1
+}
+
+download_file()
+{
+    if [ X"$dddd" == X"dddd" ];then
+        if [ ! -f "$dd_name" ];then
+            echo "unzip $file_name"
+            unzip $file_name
+        else
+            echo "$dd_name is present, will use it..."
+        fi
+    else
+        echo "Downloading $http_path..."
+        wget $http_path
+        
+        if [ -f "$file_name" ];then
+            echo "unzip $file_name"
+            unzip $file_name
+        else
+            echo "No $file_name found!!!"
+            exit 1
+        fi
+    fi
+}
+
+goldfish()
+{
+    echo "Checking $dev..."
+    for i in `ls ${dev}?`
+    do
+        if mount | grep $i &> /dev/null ; then
+            echo "umount $i..."
+            umount $i
+        else
+            echo "No such mount point..."
+        fi
+    done
+    
+    echo "Will dd $dd_name into $dev..."
+#    cat ~/password | sudo -S dd if=$dd_name of=$dev conv=fdatasync status=progress 
+}
+
+create_dir
+
+download_file
+
+goldfish
+
+echo "Done"

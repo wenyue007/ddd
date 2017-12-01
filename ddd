@@ -95,7 +95,7 @@ goldfish()
     done
     
     echo "Will dd $dd_name into $dev..."
-#    cat ~/password | sudo -S dd if=$dd_name of=$dev conv=fdatasync status=progress 
+    cat ~/password | sudo -S dd if=$dd_name of=$dev conv=fdatasync status=progress 
 }
 
 create_dir

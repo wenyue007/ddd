@@ -6,6 +6,12 @@ fi
 while [ $# -gt 0 ]; do
     if echo $1 | grep "http://" &> /dev/null ;then
         http_path=$1
+    elif [ -d $1 ];then
+        from_f="zhenniu"
+        http_path=$1
+    elif echo $1 | grep "\.wic" &> /dev/null ;then
+        wic_image=$1
+        http_path=$1
     elif echo $1 | grep "/dev/" &> /dev/null ;then
         dev=$1
     elif echo $1 | grep "dddd" &> /dev/null ; then
@@ -27,6 +33,15 @@ file_name=`basename $http_path`
 dd_name=${file_name%.*}
 dir_name=${file_name%%.*}
 
+if [ "$from_f" == "zhenniu" ] ;then
+    file_name=${http_path}.img.zip
+    dd_name=${http_path}.img
+    dir_name=$http_path
+fi
+
+echo file_name: $file_name
+echo dd_name: $dd_name
+echo dir_name: $dir_name
 
 is_empty_dir()
 {
@@ -98,6 +113,13 @@ goldfish()
     cat ~/password | sudo -S dd if=$dd_name of=$dev conv=fdatasync status=progress 
 }
 
+if [ -n "$wic_image" ];then
+    echo "Will do wic image dd action..."
+    dd_name=$wic_image
+    goldfish
+    echo "Done"
+    exit 0
+fi
 create_dir
 
 download_file

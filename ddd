@@ -9,7 +9,7 @@ while [ $# -gt 0 ]; do
     elif [ -d $1 ];then
         from_f="zhenniu"
         http_path=$1
-    elif echo $1 | grep "\.wic" &> /dev/null ;then
+    elif echo $1 | grep -E "\.wic|\.img" &> /dev/null ;then
         wic_image=$1
         http_path=$1
     elif echo $1 | grep "/dev/" &> /dev/null ;then
